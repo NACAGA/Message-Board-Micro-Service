@@ -13,11 +13,11 @@ WORKDIR /workspace
 COPY index.js .
 COPY package*.json .
 COPY src src
-COPY test test
+#COPY test test
 
 # Install dependencies
 RUN npm ci
 RUN npm install
 
 # Start the application 
-CMD ["npm", "run", "start:test"]
+CMD ["npm", "run"]
