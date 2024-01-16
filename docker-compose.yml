@@ -1,0 +1,43 @@
+version: '1'
+
+services:
+  database:
+    env_file:
+      - .env
+    build:
+      context: database
+      args:
+        - MARIADB_PASSWORD=${MARIADB_PASSWORD}
+        - MARIADB_DATABASE=${MARIADB_DATABASE}
+        - MARIADB_USER=${MARIADB_USER}
+        - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      dockerfile: Dockerfile
+    container_name: ams-database
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    restart: always
+    networks:
+      user_auth:
+        ipv4_address: 172.20.0.2
+  server:
+    depends_on:
+      - database
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ams-server
+    env_file:
+      - .env
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    tty: true
+    volumes:
+      - .:/workspace
+    networks:
+      user_auth:
+        ipv4_address: 172.20.0.3
+networks:
+  user_auth:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
