@@ -3,12 +3,13 @@ const Success = require('./domain/success.domain');
 const Error = require('./domain/errors.domain');
 
 class AddUserSuccess extends Success {
-    constructor(userid, groupid, joinedOn) {
+    constructor(userid, groupid, groupName, joinedOn) {
         super();
         this.code = 200;
         this.message = 'User added to group';
         this.groupid = groupid;
         this.userid = userid;
+        this.groupName = groupName;
         this.joinedOn = joinedOn;
     }
 }
@@ -18,6 +19,7 @@ async function addUser(req) {
     if (validateGroupExistsResult instanceof Error.BusinessError) {
         return validateGroupExistsResult;
     }
+    const groupName = validateGroupExistsResult.result[0].name;
 
     const validateUserIsntInGroupResult = await validateUserIsntInGroup(req.params.userid, req.params.groupid);
     if (validateUserIsntInGroupResult instanceof Error.BusinessError) {
@@ -30,7 +32,7 @@ async function addUser(req) {
         return addUserToGroupResult;
     }
 
-    return new AddUserSuccess(req.params.userid, req.params.groupid, joinedOn);
+    return new AddUserSuccess(req.params.userid, req.params.groupid, groupName, joinedOn);
 }
 
 async function validateGroupExists(groupid) {
