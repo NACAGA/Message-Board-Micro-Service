@@ -78,6 +78,15 @@ class AddUserToGroupError extends BusinessError {
     }
 }
 
+class UserNotInAGroupError extends BusinessError {
+    constructor(userid) {
+        super();
+        this.message = 'User not in group';
+        this.userid = userid;
+        this.code = 500;
+    }
+}
+
 module.exports = {
     BusinessError,
     DatabaseError,
@@ -87,4 +96,5 @@ module.exports = {
     GroupNotFoundError,
     AddUserToGroupError,
     UserAlreadyInGroupError,
+    UserNotInAGroupError,
 };

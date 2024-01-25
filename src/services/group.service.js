@@ -2,6 +2,7 @@ const Success = require('./domain/success.domain');
 const Error = require('./domain/errors.domain');
 const db = require('./db.service');
 const utils = require('../utils/messageBoard.util');
+const User = require('./domain/User.domain');
 
 class CreateGroupSuccess extends Success {
     constructor(group) {
@@ -30,12 +31,44 @@ class GetGroupByIdSuccess extends Success {
     }
 }
 
+class GetUserGroupSuccess extends Success {
+    constructor(user, group) {
+        super();
+        this.code = 200;
+        this.message = 'Group retrieved';
+        this.user = user;
+        this.groups = group;
+    }
+}
+
 async function getGroups(req) {
     try {
         if (req.params.groupid) {
             return await getRequestedGroupById(req.params.groupid);
         }
         return getAllGroups();
+    } catch (error) {
+        // Handle unexpected errors here
+        console.error(error);
+        return new Error.UnknownError();
+    }
+}
+
+async function getUserGroups(req) {
+    try {
+        const getUsersGroupsResult = await getAUsersGroups(req.params.userid);
+        if (getUsersGroupsResult instanceof Error.BusinessError) {
+            return getUsersGroupsResult;
+        }
+
+        const user = new User(req.params.userid);
+        const groups = [];
+
+        for (const group of getUsersGroupsResult.result) {
+            groups.push(utils.convertGroup(group));
+        }
+
+        return new GetUserGroupSuccess(user, groups);
     } catch (error) {
         // Handle unexpected errors here
         console.error(error);
@@ -100,6 +133,17 @@ async function getRequestedGroupById(groupId) {
     return new GetGroupByIdSuccess(group);
 }
 
+async function getAUsersGroups(userid) {
+    const queryResult = await db.query(
+        'SELECT g.id, g.name, g.description, g.created_at, gm.user_id, gm.joined_on FROM GroupMembers gm JOIN Groups g ON g.id = gm.group_id WHERE gm.user_id = ?;',
+        [userid]
+    );
+    if (queryResult.result.length === 0) {
+        return new Error.UserNotInAGroupError(userid);
+    }
+    return queryResult;
+}
+
 function validateGroupDoesntExist(queryResult, groupName) {
     if (queryResult.result.length > 0) {
         return new Error.GroupExistsError(groupName);
@@ -120,4 +164,4 @@ async function getGroupById(groupId) {
     return await db.query('SELECT * FROM Groups WHERE id = ?', [groupId]);
 }
 
-module.exports = { createGroup, getGroups };
+module.exports = { createGroup, getGroups, getUserGroups };

@@ -12,6 +12,28 @@ async function getGroups(req, res, next) {
     }
 }
 
+async function getUsers(req, res, next) {
+    try {
+        let response = await userService.getUsers(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while getting users: ', err);
+        next(err);
+    }
+}
+
+async function getUserGroups(req, res, next) {
+    try {
+        let response = await groupService.getUserGroups(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while getting user groups: ', err);
+        next(err);
+    }
+}
+
 async function createGroup(req, res, next) {
     try {
         let response = await groupService.createGroup(req.body);
@@ -38,4 +60,6 @@ module.exports = {
     createGroup,
     addUser,
     getGroups,
+    getUsers,
+    getUserGroups,
 };

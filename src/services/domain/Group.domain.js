@@ -1,9 +1,9 @@
 class Group {
-    constructor(id, name, description) {
+    constructor(id, name, description, dateCreated) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.dateCreated = new Date();
+        this.dateCreated = dateCreated;
     }
 }
 
