@@ -48,16 +48,29 @@ router.get('/', (req, res) => {
     });
 });
 
+/**
+ * GET all groups
+ */
 router.get('/group', messageBoardController.getGroups);
 
+/**
+ * GET gropup by groupid
+ */
 router.get('/group/:groupid', messageBoardController.getGroups);
 
+/**
+ * GET all users in a group
+ */
 router.get('/user/:groupid', messageBoardController.getUsers);
 
+/**
+ * GET all groups a user is in
+ */
 router.get('/user-groups/:userid', messageBoardController.getUserGroups);
 
-//router.get('/user/:userid', messageBoardController.getUsers);
-
+/**
+ * POST create a group
+ */
 router.post(
     '/group',
     [validateRequestBody(['name', 'description']), body('name').isString(), body('description').isString()],
