@@ -52,6 +52,10 @@ router.get('/group', messageBoardController.getGroups);
 
 router.get('/group/:groupid', messageBoardController.getGroups);
 
+router.get('/user/:groupid', messageBoardController.getUsers);
+
+//router.get('/user/:userid', messageBoardController.getUsers);
+
 router.post(
     '/group',
     [validateRequestBody(['name', 'description']), body('name').isString(), body('description').isString()],

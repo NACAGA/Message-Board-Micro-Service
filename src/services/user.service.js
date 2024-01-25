@@ -1,6 +1,8 @@
 const db = require('./db.service');
 const Success = require('./domain/success.domain');
 const Error = require('./domain/errors.domain');
+const User = require('./domain/User.domain');
+const utils = require('../utils/messageBoard.util');
 
 class AddUserSuccess extends Success {
     constructor(userid, groupid, groupName, joinedOn) {
@@ -11,6 +13,43 @@ class AddUserSuccess extends Success {
         this.userid = userid;
         this.groupName = groupName;
         this.joinedOn = joinedOn;
+    }
+}
+
+class GetUsersInGroupSuccess extends Success {
+    constructor(group, users) {
+        super();
+        this.code = 200;
+        this.message = 'Users retrieved';
+        this.group = group;
+        this.users = users;
+    }
+}
+
+async function getUsers(req) {
+    try {
+        const validateGroupExistsResult = await validateGroupExists(req.params.groupid);
+        if (validateGroupExistsResult instanceof Error.BusinessError) {
+            return validateGroupExistsResult;
+        }
+        const group = utils.convertGroup(validateGroupExistsResult.result[0]);
+
+        const getUsersResult = await getUsersInGroup(req.params.groupid);
+        if (getUsersResult instanceof Error.BusinessError) {
+            return getUsersResult;
+        }
+
+        const users = [];
+        for (const user of getUsersResult.result) {
+            console.log(user);
+            users.push(utils.convertUser(user));
+        }
+
+        return new GetUsersInGroupSuccess(group, users);
+    } catch (error) {
+        // Handle unexpected errors here
+        console.error(error);
+        return new Error.UnknownError();
     }
 }
 
@@ -39,6 +78,11 @@ async function addUser(req) {
         console.error(error);
         return new Error.UnknownError();
     }
+}
+
+async function getUsersInGroup(groupid) {
+    const queryResult = await db.query('SELECT * FROM GroupMembers WHERE group_id=?', [groupid]);
+    return queryResult;
 }
 
 async function validateGroupExists(groupid) {
@@ -70,4 +114,5 @@ async function addUserToGroup(userid, groupid, joinedOn) {
 
 module.exports = {
     addUser,
+    getUsers,
 };
