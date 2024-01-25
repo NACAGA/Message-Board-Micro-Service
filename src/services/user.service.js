@@ -41,7 +41,6 @@ async function getUsers(req) {
 
         const users = [];
         for (const user of getUsersResult.result) {
-            console.log(user);
             users.push(utils.convertUser(user));
         }
 
