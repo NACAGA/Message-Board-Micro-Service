@@ -1,7 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const { body, header } = require('express-validator');
+const { body, header, param } = require('express-validator');
 const messageBoardController = require('../controllers/messageBoard.controller');
+
+const validateUrlParameters = (expectedFields) => {
+    return (req, res, next) => {
+        const missingParams = expectedFields.filter((field) => !(field in req.params));
+
+        if (missingParams.length > 0) {
+            return res.status(400).json({
+                message: `Missing parameters: ${missingParams.join(', ')}`,
+            });
+        }
+        next();
+    };
+};
 
 const validateRequestBody = (expectedFields) => {
     return (req, res, next) => {
@@ -12,7 +25,6 @@ const validateRequestBody = (expectedFields) => {
                 message: `Missing fields: ${missingFields.join(', ')}`,
             });
         }
-
         next();
     };
 };
@@ -26,7 +38,6 @@ validateRequestHeaders = (expectedFields) => {
                 message: `Missing fields: ${missingFields.join(', ')}`,
             });
         }
-
         next();
     };
 };
@@ -38,9 +49,18 @@ router.get('/', (req, res) => {
 });
 
 router.post(
-    '/new-group',
+    '/group',
     [validateRequestBody(['name', 'description']), body('name').isString(), body('description').isString()],
     messageBoardController.createGroup
+);
+
+/**
+ * POST add a user to a group
+ */
+router.post(
+    '/user/:userid/:groupid',
+    [validateUrlParameters(['userid', 'groupid']), param('userid').isInt(), param('groupid').isInt()],
+    messageBoardController.addUser
 );
 
 module.exports = router;
