@@ -1,6 +1,17 @@
 const groupService = require('../services/group.service');
 const userService = require('../services/user.service');
 
+async function getGroups(req, res, next) {
+    try {
+        let response = await groupService.getGroups(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while getting groups: ', err);
+        next(err);
+    }
+}
+
 async function createGroup(req, res, next) {
     try {
         let response = await groupService.createGroup(req.body);
@@ -26,4 +37,5 @@ async function addUser(req, res, next) {
 module.exports = {
     createGroup,
     addUser,
+    getGroups,
 };

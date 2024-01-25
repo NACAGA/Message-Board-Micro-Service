@@ -48,6 +48,10 @@ router.get('/', (req, res) => {
     });
 });
 
+router.get('/group', messageBoardController.getGroups);
+
+router.get('/group/:groupid', messageBoardController.getGroups);
+
 router.post(
     '/group',
     [validateRequestBody(['name', 'description']), body('name').isString(), body('description').isString()],

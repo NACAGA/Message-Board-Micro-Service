@@ -4,13 +4,42 @@ const db = require('./db.service');
 const utils = require('../utils/messageBoard.util');
 
 class CreateGroupSuccess extends Success {
-    constructor(id, name, description) {
+    constructor(group) {
         super();
         this.code = 200;
         this.message = 'Group created';
-        this.id = id;
-        this.name = name;
-        this.description = description;
+        this.group = group;
+    }
+}
+
+class GetAllGroupsSuccess extends Success {
+    constructor(groups) {
+        super();
+        this.code = 200;
+        this.message = 'Groups retrieved';
+        this.groups = groups;
+    }
+}
+
+class GetGroupByIdSuccess extends Success {
+    constructor(group) {
+        super();
+        this.code = 200;
+        this.message = 'Group retrieved';
+        this.group = group;
+    }
+}
+
+async function getGroups(req) {
+    try {
+        if (req.params.groupid) {
+            return await getRequestedGroupById(req.params.groupid);
+        }
+        return getAllGroups();
+    } catch (error) {
+        // Handle unexpected errors here
+        console.error(error);
+        return new Error.UnknownError();
     }
 }
 
@@ -29,13 +58,13 @@ async function createGroup(group) {
         }
 
         if (createGroupResult.result.affectedRows > 0) {
-            const newGroup = await getGroupById(createGroupResult.result.insertId);
+            const newGroupResult = await getGroupById(createGroupResult.result.insertId);
 
-            if (newGroup instanceof Error.BusinessError) {
-                return newGroup;
+            if (newGroupResult instanceof Error.BusinessError) {
+                return newGroupResult;
             }
-
-            return new CreateGroupSuccess(newGroup.id, newGroup.name, newGroup.description);
+            const newGroup = utils.convertGroup(newGroupResult.result[0]);
+            return new CreateGroupSuccess(newGroup);
         }
 
         return new Error.CreateGroupError();
@@ -44,6 +73,31 @@ async function createGroup(group) {
         console.error(error);
         return new Error.UnknownError();
     }
+}
+
+async function getAllGroups() {
+    const queryResult = await db.query('SELECT * FROM Groups');
+    if (queryResult instanceof Error.BusinessError) {
+        return queryResult;
+    }
+    const groups = [];
+    for (const group of queryResult.result) {
+        groups.push(utils.convertGroup(group));
+    }
+
+    return new GetAllGroupsSuccess(groups);
+}
+
+async function getRequestedGroupById(groupId) {
+    const queryResult = await getGroupById(groupId);
+    if (queryResult instanceof Error.BusinessError) {
+        return queryResult;
+    }
+    if (queryResult.result.length === 0) {
+        return new Error.GroupNotFoundError(groupId);
+    }
+    const group = utils.convertGroup(queryResult.result[0]);
+    return new GetGroupByIdSuccess(group);
 }
 
 function validateGroupDoesntExist(queryResult, groupName) {
@@ -66,4 +120,4 @@ async function getGroupById(groupId) {
     return await db.query('SELECT * FROM Groups WHERE id = ?', [groupId]);
 }
 
-module.exports = { createGroup };
+module.exports = { createGroup, getGroups };
