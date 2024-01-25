@@ -1,6 +1,6 @@
 CREATE TABLE Groups (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name Unique TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     description TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

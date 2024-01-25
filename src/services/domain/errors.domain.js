@@ -49,4 +49,42 @@ class GroupExistsError extends BusinessError {
     }
 }
 
-module.exports = { BusinessError, DatabaseError, CreateGroupError, GroupExistsError, UnknownError };
+class UserAlreadyInGroupError extends BusinessError {
+    constructor(userid, groupid) {
+        super();
+        this.message = 'User already in group';
+        this.userid = userid;
+        this.groupid = groupid;
+        this.code = 500;
+    }
+}
+
+class GroupNotFoundError extends BusinessError {
+    constructor(groupid) {
+        super();
+        this.message = 'Group does not exist';
+        this.name = groupid;
+        this.code = 500;
+    }
+}
+
+class AddUserToGroupError extends BusinessError {
+    constructor(userid, groupid) {
+        super();
+        this.message = 'Unable to add user to group';
+        this.userid = userid;
+        this.groupid = groupid;
+        this.code = 500;
+    }
+}
+
+module.exports = {
+    BusinessError,
+    DatabaseError,
+    CreateGroupError,
+    GroupExistsError,
+    UnknownError,
+    GroupNotFoundError,
+    AddUserToGroupError,
+    UserAlreadyInGroupError,
+};

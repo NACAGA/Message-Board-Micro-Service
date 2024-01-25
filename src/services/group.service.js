@@ -46,16 +46,16 @@ async function createGroup(group) {
     }
 }
 
-function validateGroupDoesntExist(queryResult) {
+function validateGroupDoesntExist(queryResult, groupName) {
     if (queryResult.result.length > 0) {
-        return new Error.GroupAlreadyExistsError();
+        return new Error.GroupExistsError(groupName);
     }
     return queryResult; // Indicates success, no business error
 }
 
 async function validateGroup(group) {
     const queryResult = await db.query('SELECT * FROM Groups WHERE name=?', [group.name]);
-    return validateGroupDoesntExist(queryResult);
+    return validateGroupDoesntExist(queryResult, group.name);
 }
 
 async function createGroupInDatabase(group) {
