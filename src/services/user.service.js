@@ -15,24 +15,30 @@ class AddUserSuccess extends Success {
 }
 
 async function addUser(req) {
-    const validateGroupExistsResult = await validateGroupExists(req.params.groupid);
-    if (validateGroupExistsResult instanceof Error.BusinessError) {
-        return validateGroupExistsResult;
-    }
-    const groupName = validateGroupExistsResult.result[0].name;
+    try {
+        const validateGroupExistsResult = await validateGroupExists(req.params.groupid);
+        if (validateGroupExistsResult instanceof Error.BusinessError) {
+            return validateGroupExistsResult;
+        }
+        const groupName = validateGroupExistsResult.result[0].name;
 
-    const validateUserIsntInGroupResult = await validateUserIsntInGroup(req.params.userid, req.params.groupid);
-    if (validateUserIsntInGroupResult instanceof Error.BusinessError) {
-        return validateUserIsntInGroupResult;
-    }
+        const validateUserIsntInGroupResult = await validateUserIsntInGroup(req.params.userid, req.params.groupid);
+        if (validateUserIsntInGroupResult instanceof Error.BusinessError) {
+            return validateUserIsntInGroupResult;
+        }
 
-    const joinedOn = new Date();
-    const addUserToGroupResult = await addUserToGroup(req.params.userid, req.params.groupid, joinedOn);
-    if (addUserToGroupResult instanceof Error.BusinessError) {
-        return addUserToGroupResult;
-    }
+        const joinedOn = new Date();
+        const addUserToGroupResult = await addUserToGroup(req.params.userid, req.params.groupid, joinedOn);
+        if (addUserToGroupResult instanceof Error.BusinessError) {
+            return addUserToGroupResult;
+        }
 
-    return new AddUserSuccess(req.params.userid, req.params.groupid, groupName, joinedOn);
+        return new AddUserSuccess(req.params.userid, req.params.groupid, groupName, joinedOn);
+    } catch (error) {
+        // Handle unexpected errors here
+        console.error(error);
+        return new Error.UnknownError();
+    }
 }
 
 async function validateGroupExists(groupid) {

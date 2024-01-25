@@ -63,7 +63,7 @@ class GroupNotFoundError extends BusinessError {
     constructor(groupid) {
         super();
         this.message = 'Group does not exist';
-        this.name = groupid;
+        this.id = groupid;
         this.code = 500;
     }
 }
