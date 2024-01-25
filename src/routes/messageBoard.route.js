@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body, header } = require('express-validator');
+const messageBoardController = require('../controllers/messageBoard.controller');
 
 const validateRequestBody = (expectedFields) => {
     return (req, res, next) => {
@@ -35,5 +36,11 @@ router.get('/', (req, res) => {
         message: 'Hello World!',
     });
 });
+
+router.post(
+    '/new-group',
+    [validateRequestBody(['name', 'description']), body('name').isString(), body('description').isString()],
+    messageBoardController.createGroup
+);
 
 module.exports = router;
