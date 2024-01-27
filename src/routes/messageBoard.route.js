@@ -101,4 +101,19 @@ router.post(
     messageBoardController.createPost
 );
 
+/**
+ * POST create a comment
+ */
+router.post(
+    '/comment/:userid/:postid',
+    [
+        validateUrlParameters(['userid', 'postid']),
+        validateRequestBody(['content']),
+        param('userid').isInt(),
+        param('postid').isInt(),
+        body('content').isString(),
+    ],
+    messageBoardController.createComment
+);
+
 module.exports = router;
