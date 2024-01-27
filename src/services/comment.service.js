@@ -1,6 +1,7 @@
 const Success = require('./domain/success.domain');
 const Error = require('./domain/errors.domain');
 const db = require('./db.service');
+const utils = require('../utils/messageBoard.util');
 
 class CreateCommentSuccess extends Success {
     constructor(userid, postid) {
@@ -12,13 +13,36 @@ class CreateCommentSuccess extends Success {
     }
 }
 
+class GetCommentsSuccess extends Success {
+    constructor(comments) {
+        super();
+        this.code = 200;
+        this.comments = comments;
+    }
+}
+
+class GetCommentByIdSuccess extends GetCommentsSuccess {
+    constructor(comments) {
+        super(comments);
+    }
+}
+
+class GetCommentByPostSuccess extends GetCommentsSuccess {
+    constructor(comments, postid) {
+        super(comments);
+        this.postid = postid;
+    }
+}
+
+class GetUserCommentsSuccess extends GetCommentsSuccess {
+    constructor(comments, userid) {
+        super(comments);
+        this.userid = userid;
+    }
+}
+
 async function createComment(req) {
     try {
-        const validatePostExistsResult = await validatePostExists(req.params.postid);
-        if (validatePostExistsResult instanceof Error.BusinessError) {
-            return validatePostExistsResult;
-        }
-
         const verifyUserIsInGroupResult = await verifyUserIsInGroup(req.params.userid, req.params.postid);
         if (verifyUserIsInGroupResult instanceof Error.BusinessError) {
             return verifyUserIsInGroupResult;
@@ -38,14 +62,69 @@ async function createComment(req) {
     }
 }
 
-async function validatePostExists(groupid) {
-    const sql = 'SELECT * FROM Groups WHERE id = ?';
-    const params = [groupid];
-    const result = await db.query(sql, params);
-    if (result.result.length === 0) {
-        return new Error.GroupNotFoundError(groupid);
+async function getCommentById(req) {
+    try {
+        const getCommentByIdResult = await getCommentByIdQuery(req.params.commentid);
+        if (getCommentByIdResult instanceof Error.BusinessError) {
+            return getCommentByIdResult;
+        }
+
+        const comments = [];
+        for (const comment of getCommentByIdResult.result) {
+            comments.push(utils.convertComment(comment));
+        }
+
+        return new GetCommentByIdSuccess(comments);
+    } catch (error) {
+        // Handle unexpected errors here
+        console.error(error);
+        return new Error.UnknownError();
     }
-    return result;
+}
+
+async function getPostComments(req) {
+    try {
+        const verifyPostExistsResult = await verifyPostExists(req.params.postid);
+        if (verifyPostExistsResult instanceof Error.BusinessError) {
+            return verifyPostExistsResult;
+        }
+
+        const getCommentsResult = await getPostCommentsQuery(req.params.postid);
+        if (getCommentsResult instanceof Error.BusinessError) {
+            return getCommentsResult;
+        }
+
+        const comments = [];
+        for (const comment of getCommentsResult.result) {
+            comments.push(utils.convertComment(comment));
+        }
+
+        return new GetCommentByPostSuccess(comments, req.params.postid);
+    } catch (error) {
+        // Handle unexpected errors here
+        console.error(error);
+        return new Error.UnknownError();
+    }
+}
+
+async function getUserComments(req) {
+    try {
+        const getCommentsResult = await getCommentByUserQuery(req.params.userid);
+        if (getCommentsResult instanceof Error.BusinessError) {
+            return getCommentsResult;
+        }
+
+        const comments = [];
+        for (const comment of getCommentsResult.result) {
+            comments.push(utils.convertComment(comment));
+        }
+
+        return new GetUserCommentsSuccess(comments, req.params.userid);
+    } catch (error) {
+        // Handle unexpected errors here
+        console.error(error);
+        return new Error.UnknownError();
+    }
 }
 
 async function verifyUserIsInGroup(userid, postid) {
@@ -60,6 +139,18 @@ async function verifyUserIsInGroup(userid, postid) {
         return new Error.UserNotInGroupError(userid, groupid);
     }
     return queryResult;
+}
+
+async function verifyPostExists(postid) {
+    const queryResult = await db.query('SELECT * FROM Posts WHERE id = ?', [postid]);
+    if (queryResult.result.length === 0) {
+        return new Error.PostNotFoundError(postid);
+    }
+    return queryResult;
+}
+
+async function getPostCommentsQuery(postid) {
+    return await db.query('SELECT * FROM Comments WHERE post_id = ?', [postid]);
 }
 
 async function createCommentQuery(userid, postid, content, commentedOnDate) {
@@ -77,12 +168,16 @@ async function createCommentQuery(userid, postid, content, commentedOnDate) {
     return queryResult;
 }
 
-async function getCommentById(postid) {
-    const queryResult = await db.query('SELECT * FROM Comments WHERE id = ?', [postid]);
+async function getCommentByIdQuery(commentid) {
+    const queryResult = await db.query('SELECT * FROM Comments WHERE id = ?', [commentid]);
     if (queryResult.result.length === 0) {
-        return new Error.PostNotFoundError(postid);
+        return new Error.CommentNotFoundError(commentid);
     }
     return queryResult;
 }
 
-module.exports = { createComment };
+async function getCommentByUserQuery(userid) {
+    return await db.query('SELECT * FROM Comments WHERE user_id = ?', [userid]);
+}
+
+module.exports = { createComment, getCommentById, getPostComments, getUserComments };
