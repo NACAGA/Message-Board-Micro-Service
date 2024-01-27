@@ -87,6 +87,33 @@ class UserNotInAGroupError extends BusinessError {
     }
 }
 
+class CreatePostError extends BusinessError {
+    constructor() {
+        super();
+        this.message = 'Post not created';
+        this.code = 500;
+    }
+}
+
+class UserNotInGroupError extends BusinessError {
+    constructor(userid, groupid) {
+        super();
+        this.message = 'User not in group';
+        this.userid = userid;
+        this.groupid = groupid;
+        this.code = 500;
+    }
+}
+
+class PostNotFoundError extends BusinessError {
+    constructor(postid) {
+        super();
+        this.message = 'Post does not exist';
+        this.postid = postid;
+        this.code = 500;
+    }
+}
+
 module.exports = {
     BusinessError,
     DatabaseError,
@@ -97,4 +124,6 @@ module.exports = {
     AddUserToGroupError,
     UserAlreadyInGroupError,
     UserNotInAGroupError,
+    CreatePostError,
+    UserNotInGroupError,
 };
