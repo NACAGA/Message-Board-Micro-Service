@@ -66,7 +66,7 @@ router.get('/user/:groupid', messageBoardController.getUsers);
 /**
  * GET all groups a user is in
  */
-router.get('/user-groups/:userid', messageBoardController.getUserGroups);
+router.get('/user/groups/:userid', messageBoardController.getUserGroups);
 
 /**
  * POST create a group
@@ -84,6 +84,21 @@ router.post(
     '/user/:userid/:groupid',
     [validateUrlParameters(['userid', 'groupid']), param('userid').isInt(), param('groupid').isInt()],
     messageBoardController.addUser
+);
+
+/**
+ * POST create a post
+ */
+router.post(
+    '/post/:userid/:groupid',
+    [
+        validateUrlParameters(['userid', 'groupid']),
+        validateRequestBody(['content']),
+        param('userid').isInt(),
+        param('groupid').isInt(),
+        body('content').isString(),
+    ],
+    messageBoardController.createPost
 );
 
 module.exports = router;
