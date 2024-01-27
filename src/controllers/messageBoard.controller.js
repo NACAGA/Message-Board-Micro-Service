@@ -36,6 +36,39 @@ async function getUserGroups(req, res, next) {
     }
 }
 
+async function getCommentById(req, res, next) {
+    try {
+        let response = await commentService.getCommentById(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while getting comments: ', err);
+        next(err);
+    }
+}
+
+async function getPostComments(req, res, next) {
+    try {
+        let response = await commentService.getPostComments(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while getting post comments: ', err);
+        next(err);
+    }
+}
+
+async function getUserComments(req, res, next) {
+    try {
+        let response = await commentService.getUserComments(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while getting user comments: ', err);
+        next(err);
+    }
+}
+
 async function createGroup(req, res, next) {
     try {
         let response = await groupService.createGroup(req.body);
@@ -88,4 +121,7 @@ module.exports = {
     getUserGroups,
     createPost,
     createComment,
+    getCommentById,
+    getUserComments,
+    getPostComments,
 };

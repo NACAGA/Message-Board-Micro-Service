@@ -19,7 +19,6 @@ class UnknownError extends BusinessError {
     constructor() {
         super();
         this.message = 'Unknown error';
-        this.code = 500;
     }
 }
 
@@ -27,7 +26,6 @@ class DatabaseError extends BusinessError {
     constructor(err) {
         super();
         this.message = 'Error querying the database';
-        this.code = 500;
         this.error = err;
     }
 }
@@ -36,7 +34,6 @@ class CreateGroupError extends BusinessError {
     constructor() {
         super();
         this.message = 'Group not created';
-        this.code = 500;
     }
 }
 
@@ -45,7 +42,6 @@ class GroupExistsError extends BusinessError {
         super();
         this.message = 'Group already exists';
         this.name = name;
-        this.code = 500;
     }
 }
 
@@ -55,7 +51,6 @@ class UserAlreadyInGroupError extends BusinessError {
         this.message = 'User already in group';
         this.userid = userid;
         this.groupid = groupid;
-        this.code = 500;
     }
 }
 
@@ -64,7 +59,6 @@ class GroupNotFoundError extends BusinessError {
         super();
         this.message = 'Group does not exist';
         this.id = groupid;
-        this.code = 500;
     }
 }
 
@@ -74,7 +68,6 @@ class AddUserToGroupError extends BusinessError {
         this.message = 'Unable to add user to group';
         this.userid = userid;
         this.groupid = groupid;
-        this.code = 500;
     }
 }
 
@@ -83,7 +76,6 @@ class UserNotInAGroupError extends BusinessError {
         super();
         this.message = 'User not in group';
         this.userid = userid;
-        this.code = 500;
     }
 }
 
@@ -91,7 +83,6 @@ class CreatePostError extends BusinessError {
     constructor() {
         super();
         this.message = 'Post not created';
-        this.code = 500;
     }
 }
 
@@ -101,7 +92,6 @@ class UserNotInGroupError extends BusinessError {
         this.message = 'User not in group';
         this.userid = userid;
         this.groupid = groupid;
-        this.code = 500;
     }
 }
 
@@ -110,7 +100,6 @@ class PostNotFoundError extends BusinessError {
         super();
         this.message = 'Post does not exist';
         this.postid = postid;
-        this.code = 500;
     }
 }
 
@@ -118,6 +107,14 @@ class CreateCommentError extends BusinessError {
     constructor() {
         super();
         this.message = 'Comment not created';
+    }
+}
+
+class CommentNotFoundError extends BusinessError {
+    constructor(commentid) {
+        super();
+        this.message = 'Comment does not exist';
+        this.commentid = commentid;
         this.code = 500;
     }
 }
@@ -136,4 +133,5 @@ module.exports = {
     UserNotInGroupError,
     PostNotFoundError,
     CreateCommentError,
+    CommentNotFoundError,
 };

@@ -69,6 +69,21 @@ router.get('/user/:groupid', messageBoardController.getUsers);
 router.get('/user/groups/:userid', messageBoardController.getUserGroups);
 
 /**
+ * GET comment by id
+ */
+router.get('/comment/:commentid', messageBoardController.getCommentById);
+
+/**
+ * GET all comments on a post
+ */
+router.get('/comment/post/:postid', messageBoardController.getPostComments);
+
+/**
+ * GET all comments by a user
+ */
+router.get('/comment/user/:userid', messageBoardController.getUserComments);
+
+/**
  * POST create a group
  */
 router.post(
