@@ -114,6 +114,14 @@ class PostNotFoundError extends BusinessError {
     }
 }
 
+class CreateCommentError extends BusinessError {
+    constructor() {
+        super();
+        this.message = 'Comment not created';
+        this.code = 500;
+    }
+}
+
 module.exports = {
     BusinessError,
     DatabaseError,
@@ -126,4 +134,6 @@ module.exports = {
     UserNotInAGroupError,
     CreatePostError,
     UserNotInGroupError,
+    PostNotFoundError,
+    CreateCommentError,
 };

@@ -1,6 +1,7 @@
 const groupService = require('../services/group.service');
 const userService = require('../services/user.service');
 const postService = require('../services/post.service');
+const commentService = require('../services/comment.service');
 
 async function getGroups(req, res, next) {
     try {
@@ -68,6 +69,17 @@ async function createPost(req, res, next) {
     }
 }
 
+async function createComment(req, res, next) {
+    try {
+        let response = await commentService.createComment(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while creating comment: ', err);
+        next(err);
+    }
+}
+
 module.exports = {
     createGroup,
     addUser,
@@ -75,4 +87,5 @@ module.exports = {
     getUsers,
     getUserGroups,
     createPost,
+    createComment,
 };
