@@ -131,4 +131,17 @@ router.post(
     messageBoardController.createComment
 );
 
+/**
+ * POST create a like
+ */
+router.post(
+    '/like/:userid/:mediatype/:mediaid',
+    [
+        validateUrlParameters(['userid', 'mediatype', 'mediaid']),
+        param('userid').isInt(),
+        param('mediatype') === 'post' || param('mediatype') === 'comment',
+        param('mediaid').isInt(),
+    ],
+    messageBoardController.createLike
+);
 module.exports = router;

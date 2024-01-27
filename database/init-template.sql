@@ -33,8 +33,8 @@ CREATE TABLE Comments (
 
 CREATE TABLE Likes (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    post_id INT NOT NULL,
+    media_type ENUM('POST', 'COMMENT') NOT NULL,
+    media_id INT NOT NULL,
     user_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (post_id) REFERENCES Posts(id)
 );

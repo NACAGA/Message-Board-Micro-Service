@@ -119,6 +119,31 @@ class CommentNotFoundError extends BusinessError {
     }
 }
 
+class InvalidMediaTypeError extends BusinessError {
+    constructor(mediatype) {
+        super();
+        this.message = 'Invalid media type';
+        this.mediatype = mediatype;
+    }
+}
+
+class UserHasAlreadyLikedError extends BusinessError {
+    constructor(userid, mediatype, mediaid) {
+        super();
+        this.message = 'User has already liked';
+        this.userid = userid;
+        this.mediatype = mediatype;
+        this.mediaid = mediaid;
+    }
+}
+
+class CreateLikeError extends BusinessError {
+    constructor() {
+        super();
+        this.message = 'Like not created';
+    }
+}
+
 module.exports = {
     BusinessError,
     DatabaseError,
@@ -134,4 +159,7 @@ module.exports = {
     PostNotFoundError,
     CreateCommentError,
     CommentNotFoundError,
+    InvalidMediaTypeError,
+    UserHasAlreadyLikedError,
+    CreateLikeError,
 };

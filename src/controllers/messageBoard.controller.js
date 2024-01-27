@@ -113,6 +113,17 @@ async function createComment(req, res, next) {
     }
 }
 
+async function createLike(req, res, next) {
+    try {
+        let response = await likeService.createLike(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while creating like: ', err);
+        next(err);
+    }
+}
+
 module.exports = {
     createGroup,
     addUser,
@@ -124,4 +135,5 @@ module.exports = {
     getCommentById,
     getUserComments,
     getPostComments,
+    createLike,
 };
