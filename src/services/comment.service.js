@@ -62,12 +62,12 @@ async function verifyUserIsInGroup(userid, postid) {
     return queryResult;
 }
 
-async function createCommentQuery(userid, groupid, content, postedOnDate) {
-    const queryResult = await db.query('INSERT INTO Posts (user_id, group_id, content, created_at) VALUES (?, ?, ?, ?)', [
+async function createCommentQuery(userid, postid, content, commentedOnDate) {
+    const queryResult = await db.query('INSERT INTO Comments (user_id, post_id, content, created_at) VALUES (?, ?, ?, ?)', [
         userid,
-        groupid,
+        postid,
         content,
-        postedOnDate,
+        commentedOnDate,
     ]);
 
     if (queryResult.result.affectedRows === 0) {
