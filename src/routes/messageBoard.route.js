@@ -139,7 +139,7 @@ router.post(
     [
         validateUrlParameters(['userid', 'mediatype', 'mediaid']),
         param('userid').isInt(),
-        param('mediatype') === 'post' || param('mediatype') === 'comment',
+        //() => param('mediatype') === 'post' || param('mediatype') === 'comment',
         param('mediaid').isInt(),
     ],
     messageBoardController.createLike

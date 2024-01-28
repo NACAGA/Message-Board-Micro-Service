@@ -17,28 +17,37 @@ class CreateLikeSuccess extends Success {
 async function createLike(req) {
     try {
         let mediaType;
-        if (req.body.mediatype === MediaType.Post) {
+        if (req.params.mediatype === 'post') {
             mediaType = MediaType.Post;
-            const verifyPostExistsResult = await verifyPostExists(req.body.mediaid);
+            const verifyPostExistsResult = await verifyPostExists(req.params.mediaid);
             if (verifyPostExistsResult instanceof Error.BusinessError) {
                 return verifyPostExistsResult;
             }
-
-        } else if (req.body.mediatype === MediaType.Comment) {
+        } else if (req.params.mediatype === 'comment') {
             mediaType = MediaType.Comment;
-            const verifyCommentExistsResult = await verifyCommentExists(req.body.mediaid);
+            const verifyCommentExistsResult = await verifyCommentExists(req.params.mediaid);
             if (verifyCommentExistsResult instanceof Error.BusinessError) {
                 return verifyCommentExistsResult;
             }
-        }
-        else {
-            return new Error.InvalidMediaTypeError(req.body.mediatype);
+        } else {
+            return new Error.InvalidMediaTypeError(req.params.mediatype);
         }
 
-        const verifyUserHasNotLikedResult = await verifyUserHasNotLiked(req.body.userid, mediaType, req.body.mediaid);
-            if (verifyUserHasNotLikedResult instanceof Error.BusinessError) {
-                return verifyUserHasNotLikedResult;
-            }
+        const verifyUserHasNotLikedResult = await verifyUserHasNotLiked(req.params.userid, mediaType, req.params.mediaid);
+        if (verifyUserHasNotLikedResult instanceof Error.BusinessError) {
+            return verifyUserHasNotLikedResult;
+        }
+
+        const createLikeResult = await createLikeQuery(req.params.userid, mediaType, req.params.mediaid);
+        if (createLikeResult instanceof Error.BusinessError) {
+            return createLikeResult;
+        }
+
+        return new CreateLikeSuccess(req.params.userid, mediaType, req.params.mediaid);
+    } catch (error) {
+        // Handle unexpected errors here
+        console.error(error);
+        return new Error.UnknownError();
     }
 }
 
@@ -59,7 +68,11 @@ async function verifyCommentExists(commentid) {
 }
 
 async function verifyUserHasNotLiked(userid, mediatype, mediaid) {
-    const queryResult = await db.query('SELECT * FROM Likes WHERE user_id = ? AND media_type = ? AND media_id = ?', [userid, mediatype, mediaid]);
+    const queryResult = await db.query('SELECT * FROM Likes WHERE user_id = ? AND media_type = ? AND media_id = ?', [
+        userid,
+        mediatype,
+        mediaid,
+    ]);
     if (queryResult.result.length > 0) {
         return new Error.UserHasAlreadyLikedError(userid, mediatype, mediaid);
     }
@@ -67,11 +80,7 @@ async function verifyUserHasNotLiked(userid, mediatype, mediaid) {
 }
 
 async function createLikeQuery(userid, mediatype, mediaid) {
-    const queryResult = await db.query('INSERT INTO Likes (user_id, media_type, media_id) VALUES (?, ?, ?)', [
-        userid,
-        mediatype,
-        mediaid,
-    ]);
+    const queryResult = await db.query('INSERT INTO Likes (user_id, media_type, media_id) VALUES (?, ?, ?)', [userid, mediatype, mediaid]);
 
     if (queryResult.result.affectedRows === 0) {
         return new Error.CreateLikeError();

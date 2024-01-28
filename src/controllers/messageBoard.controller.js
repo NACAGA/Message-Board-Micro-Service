@@ -2,6 +2,7 @@ const groupService = require('../services/group.service');
 const userService = require('../services/user.service');
 const postService = require('../services/post.service');
 const commentService = require('../services/comment.service');
+const likeService = require('../services/like.service');
 
 async function getGroups(req, res, next) {
     try {

@@ -36,5 +36,5 @@ CREATE TABLE Likes (
     media_type ENUM('POST', 'COMMENT') NOT NULL,
     media_id INT NOT NULL,
     user_id INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
