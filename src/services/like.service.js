@@ -13,7 +13,7 @@ class CreateLikeSuccess extends Success {
         this.mediaid = mediaid;
     }
 }
-// Test
+
 async function createLike(req) {
     try {
         let mediaType;
