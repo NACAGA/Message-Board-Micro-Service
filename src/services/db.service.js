@@ -22,6 +22,7 @@ async function getConnection() {
         }
         return connection;
     } catch (err) {
+        console.error(err);
         return new Error.DatabaseError(err);
     }
 }

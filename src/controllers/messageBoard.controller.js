@@ -4,6 +4,17 @@ const postService = require('../services/post.service');
 const commentService = require('../services/comment.service');
 const likeService = require('../services/like.service');
 
+async function getPostById(req, res, next) {
+    try {
+        let response = await postService.getPostById(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while getting post: ', err);
+        next(err);
+    }
+}
+
 async function getGroups(req, res, next) {
     try {
         let response = await groupService.getGroups(req);
@@ -125,6 +136,7 @@ async function createLike(req, res, next) {
     }
 }
 
+
 module.exports = {
     createGroup,
     addUser,
@@ -137,4 +149,5 @@ module.exports = {
     getUserComments,
     getPostComments,
     createLike,
+    getPostById,
 };

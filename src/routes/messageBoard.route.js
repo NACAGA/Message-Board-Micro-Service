@@ -83,6 +83,16 @@ router.get('/comment/post/:postid', messageBoardController.getPostComments);
  */
 router.get('/comment/user/:userid', messageBoardController.getUserComments);
 
+/** TODO
+ * GET post
+ * GET all posts in a group
+ * GET all posts by a user
+ */
+
+router.get('/post/:postid',
+    [validateUrlParameters(['postid']), param('postid').isInt()],
+    messageBoardController.getPostById);
+
 /**
  * POST create a group
  */

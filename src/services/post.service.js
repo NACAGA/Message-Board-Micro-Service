@@ -72,11 +72,13 @@ async function createPostQuery(userid, groupid, content, postedOnDate) {
 }
 
 async function getPostById(postid) {
-    const queryResult = await db.query('SELECT * FROM Posts WHERE id = ?', [postid]);
+    const idToLookFor = postid.params.postid;
+    console.log('idToLookFor', idToLookFor);
+    const queryResult = await db.query('SELECT * FROM Posts WHERE id = ?', [idToLookFor]);
     if (queryResult.result.length === 0) {
-        return new Error.PostNotFoundError(postid);
+        return new Error.PostNotFoundError(idToLookFor);
     }
     return queryResult;
 }
 
-module.exports = { createPost };
+module.exports = { createPost, getPostById };

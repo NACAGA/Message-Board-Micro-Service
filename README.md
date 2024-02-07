@@ -29,132 +29,53 @@ the new repo with labels. After running "npm install", run the following command
     npx ghlbl -o NACAGA -r <name-of-new-repo> -t <organization-pat> -i docs/labels.json
 ```
 
-## Overview
+## Setup
 
-Provide a high-level overview of the microservice, including its purpose, key features, and any important concepts.
-
-## Endpoints
-
-### Base URL
-
-#### Endpoint 1
-
--   **URL**: `/endpoint1`
--   **Method**: `GET`
--   **Description**: Description of what this endpoint does.
--   **Query Parameters**:
-
-    | Parameter | Type   | Description           |
-    | --------- | ------ | --------------------- |
-    | `param1`  | String | Description of param1 |
-    | `param2`  | Number | Description of param2 |
-
--   **Example**:
-
-    Request
-
-    ```json
-    {
-        "headers": {},
-        "body": {
-            "body-element-1": "element-1"
-        }
-    }
-    ```
-
-    ```json
-    {
-        "result": {
-            "response-element-1": "example response"
-        }
-    }
-    ```
-
-## Database
-
-### Setup
-
-These are the steps to follow to get the database running in a local docker container.
-
-### Database Type
-
-The microservice uses a relational database system, specifically MySQL.
-
-### Database Schema
-
-The following tables constitute the database schema:
-
-#### Users Table
-
-Stores information about users.
-
-| Column       | Type     | Description                    |
-| ------------ | -------- | ------------------------------ |
-| `id`         | INT      | Unique user identifier         |
-| `username`   | VARCHAR  | User's username                |
-| `email`      | VARCHAR  | User's email address           |
-| `created_at` | DATETIME | Date and time of user creation |
-
-### Relationships
-
--   The `Posts` table has a foreign key (`user_id`) referencing the `Users` table's `id`.
-
-## Getting Started
-
-### Prerequisites
-
-Before you begin, ensure you have the following prerequisites installed:
-
--   [Node.js](https://nodejs.org/) (version X.X.X or higher)
--   [npm](https://www.npmjs.com/) (version X.X.X or higher)
--   [MySQL](https://www.mysql.com/) (if using a MySQL database)
-
-### Installation
-
-1. Clone the repository:
-
-    ```bash
-    git clone https://github.com/NACAGA/<new-microservice>.git
-    ```
-
-2. Change into the project directory:
-
-    ```bash
-    cd <new-microservice>
-    ```
-
-3. Install dependencies:
-
-    ```bash
-    npm install
-    ```
-
-### Environment Variables
-
-Make sure to include a `.env` file in the root directory of the project (Same directory as this README). The following environment variables
-should be present:
-
-```env
-HOST=localhost
-```
-
-Adjust the values based on your specific configuration.
-
-### Running the Microservice
-
-To run the service locally on your machine, run the following command inside of the server directory.
+You will need to create a `.env` file in the root directory of the project with the following variables:
 
 ```bash
-npm start
+MARIADB_PASSWORD=password
+MARIADB_USER=user1
+MARIADB_DATABASE=message_service
+MARIADB_ROOT_PASSWORD=root_password
+DB_PORT=3306
+SERVER_PORT=3002
+
+DB_HOST=localhost
 ```
 
-To spin up the microservice in a local docker container, follow these steps:
+## Usage
 
-1. Run this command in the server directory
-    ```bash
-    docker ...
-    ```
+### Starting the Database
 
-## Testing
+To start the database in a docker container, run the following command:
 
-Provide instructions on how to perform tests from the test suite here.
+```bash
+[ ! -f .env ] || export $(grep -v '^#' .env | xargs)
+docker build -t mbm-database database $(for i in `cat .env`; do out+="--build-arg $i " ; done; echo $out;out="")
+docker run --rm -d -p $DB_PORT:$DB_PORT --name mbm-database-dt mbm-database
+```
+
+### Starting the Server
+
+To start the server, run the following command:
+
+```bash
+npm ci
+npm i
+DB_HOST=localhost npm start
+```
+
+You can also run tests with the following command:
+
+```bash
+DB_HOST=localhost npm test
+```
+
+### Using Docker Compose
+
+To start the database and the server together using docker compose, run the following command:
+
+```bash
+docker compose up --build
+```
