@@ -27,6 +27,16 @@ async function getPostsByUserId(req, res, next) {
     }
 }
 
+async function getPostsByGroupId(req, res, next) {
+    try {
+        let response = await postService.getPostsByGroupId(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while getting post: ', err);
+        next(err);
+    }
+}
 
 
 async function getGroups(req, res, next) {
@@ -165,4 +175,5 @@ module.exports = {
     createLike,
     getPostById,
     getPostsByUserId,
+    getPostsByGroupId,
 };

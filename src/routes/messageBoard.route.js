@@ -96,6 +96,10 @@ router.get('/post/user/:userid',
     [validateUrlParameters(['userid']), param('userid').isInt()],
     messageBoardController.getPostsByUserId);
 
+router.get('/post/group/:groupid',
+    [validateUrlParameters(['groupid']), param('groupid').isInt()],
+    messageBoardController.getPostsByGroupId);
+
 /**
  * POST create a group
  */

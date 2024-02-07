@@ -110,4 +110,21 @@ async function getPostsByUserId(userid) {
     return queryResult;
 }
 
-module.exports = { createPost, getPostById, getPostsByUserId };
+async function getPostsByGroupId(groupid) {
+    const idToLookFor = await parseId(groupid.params.groupid);
+
+    if (idToLookFor instanceof Error.InvalidIdError) {
+        return new Error.InvalidIdError(idToLookFor);
+    }
+
+    // first check if the group exists
+    const groupExists = await db.query('SELECT * FROM Groups WHERE id = ?', [idToLookFor]);
+    if (groupExists.result.length === 0) {
+        return new Error.GroupNotFoundError(idToLookFor);
+    }
+
+    const queryResult = await db.query('SELECT * FROM Posts WHERE group_id = ?', [idToLookFor]);
+    return queryResult;
+}
+
+module.exports = { createPost, getPostById, getPostsByUserId, getPostsByGroupId };
