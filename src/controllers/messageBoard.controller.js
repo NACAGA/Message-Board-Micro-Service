@@ -15,6 +15,20 @@ async function getPostById(req, res, next) {
     }
 }
 
+
+async function getPostsByUserId(req, res, next) {
+    try {
+        let response = await postService.getPostsByUserId(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while getting post: ', err);
+        next(err);
+    }
+}
+
+
+
 async function getGroups(req, res, next) {
     try {
         let response = await groupService.getGroups(req);
@@ -150,4 +164,5 @@ module.exports = {
     getPostComments,
     createLike,
     getPostById,
+    getPostsByUserId,
 };

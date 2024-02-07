@@ -42,3 +42,4 @@ CREATE TABLE Likes (
 INSERT INTO Groups (name, description) VALUES ('General', 'General discussion group');
 INSERT INTO GroupMembers (group_id, user_id) VALUES (1, 1);
 INSERT INTO Posts (group_id, user_id, content) VALUES (1, 1, 'Hello, World!');
+INSERT INTO Posts (group_id, user_id, content) VALUES (1, 1, 'A second post by the same user!');

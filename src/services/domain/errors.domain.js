@@ -144,6 +144,22 @@ class CreateLikeError extends BusinessError {
     }
 }
 
+class UserNotFoundError extends BusinessError {
+    constructor(userid) {
+        super();
+        this.message = 'User does not exist';
+        this.userid = userid;
+    }
+}
+
+class InvalidIdError extends BusinessError {
+    constructor(id) {
+        super();
+        this.message = 'Invalid id';
+        this.id = id;
+    }
+}
+
 module.exports = {
     BusinessError,
     DatabaseError,
@@ -162,4 +178,6 @@ module.exports = {
     InvalidMediaTypeError,
     UserHasAlreadyLikedError,
     CreateLikeError,
+    UserNotFoundError,
+    InvalidIdError,
 };

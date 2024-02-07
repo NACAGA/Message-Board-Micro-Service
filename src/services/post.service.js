@@ -48,6 +48,14 @@ async function validateGroupExists(groupid) {
     return result;
 }
 
+async function parseId(originalId) {
+    const id = parseInt(originalId);
+    if (isNaN(id) || !Number(originalId)) {
+        return new Error.InvalidIdError(id);
+    }
+    return id;
+}
+
 async function verifyUserIsInGroup(userid, groupid) {
     const queryResult = await db.query('SELECT * FROM GroupMembers WHERE user_id = ? AND group_id = ?', [userid, groupid]);
     if (queryResult.result.length === 0) {
@@ -72,8 +80,12 @@ async function createPostQuery(userid, groupid, content, postedOnDate) {
 }
 
 async function getPostById(postid) {
-    const idToLookFor = postid.params.postid;
-    console.log('idToLookFor', idToLookFor);
+    const idToLookFor = await parseId(postid.params.postid);
+
+    if (idToLookFor instanceof Error.InvalidIdError) {
+        return new Error.InvalidIdError(idToLookFor);
+    }
+
     const queryResult = await db.query('SELECT * FROM Posts WHERE id = ?', [idToLookFor]);
     if (queryResult.result.length === 0) {
         return new Error.PostNotFoundError(idToLookFor);
@@ -81,4 +93,21 @@ async function getPostById(postid) {
     return queryResult;
 }
 
-module.exports = { createPost, getPostById };
+async function getPostsByUserId(userid) {
+    const idToLookFor = await parseId(userid.params.userid);
+
+    if (idToLookFor instanceof Error.InvalidIdError) {
+        return new Error.InvalidIdError(idToLookFor);
+    }
+
+    // first check if the user exists
+    const userExists = await db.query('SELECT * FROM GroupMembers WHERE id = ?', [idToLookFor]);
+    if (userExists.result.length === 0) {
+        return new Error.UserNotFoundError(idToLookFor);
+    }
+
+    const queryResult = await db.query('SELECT * FROM Posts WHERE user_id = ?', [idToLookFor]);
+    return queryResult;
+}
+
+module.exports = { createPost, getPostById, getPostsByUserId };
