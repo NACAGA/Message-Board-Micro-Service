@@ -25,9 +25,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - DB_HOST=database
     container_name: message-board-server
-    env_file:
-      - .env
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
     tty: true

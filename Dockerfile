@@ -19,5 +19,9 @@ COPY src src
 RUN npm ci
 RUN npm install
 
+# override localhost with the host IP if given as an argument
+ARG DB_HOST=localhost
+ENV DB_HOST=${DB_HOST}
+
 # Start the application 
-CMD ["npm", "run"]
+CMD ["npm", "run", "start"]
