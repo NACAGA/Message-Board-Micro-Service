@@ -83,22 +83,23 @@ router.get('/comment/post/:postid', messageBoardController.getPostComments);
  */
 router.get('/comment/user/:userid', messageBoardController.getUserComments);
 
-/** 
+/**
  * GET post
  * GET all posts in a group
  * GET all posts by a user
+ * GET all posts :days days back
  */
-router.get('/post/:postid',
-    [validateUrlParameters(['postid']), param('postid').isInt()],
-    messageBoardController.getPostById);
+router.get('/post/:postid', [validateUrlParameters(['postid']), param('postid').isInt()], messageBoardController.getPostById);
 
-router.get('/post/user/:userid',
-    [validateUrlParameters(['userid']), param('userid').isInt()],
-    messageBoardController.getPostsByUserId);
+router.get('/post/user/:userid', [validateUrlParameters(['userid']), param('userid').isInt()], messageBoardController.getPostsByUserId);
 
-router.get('/post/group/:groupid',
+router.get(
+    '/post/group/:groupid',
     [validateUrlParameters(['groupid']), param('groupid').isInt()],
-    messageBoardController.getPostsByGroupId);
+    messageBoardController.getPostsByGroupId
+);
+
+router.get('/post/date/:days', [validateUrlParameters(['days']), param('days').isInt()], messageBoardController.getPostsByDate);
 
 /**
  * POST create a group

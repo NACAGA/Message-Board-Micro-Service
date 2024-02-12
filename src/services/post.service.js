@@ -1,7 +1,7 @@
 const Success = require('./domain/success.domain');
 const Error = require('./domain/errors.domain');
 const db = require('./db.service');
-
+const utils = require('../utils/messageBoard.util');
 class CreatePostSuccess extends Success {
     constructor(userid, groupid) {
         super();
@@ -9,6 +9,15 @@ class CreatePostSuccess extends Success {
         this.message = 'Post created';
         this.groupid = groupid;
         this.userid = userid;
+    }
+}
+
+class GetPostsSuccess extends Success {
+    constructor(posts) {
+        super();
+        this.code = 200;
+        this.message = 'Posts retrieved';
+        this.posts = posts;
     }
 }
 
@@ -127,4 +136,35 @@ async function getPostsByGroupId(groupid) {
     return queryResult;
 }
 
-module.exports = { createPost, getPostById, getPostsByUserId, getPostsByGroupId };
+async function getPostsByDate(req) {
+    const daysToLookBack = req.params.days;
+    let justIds;
+    try {
+        justIds = JSON.parse(req.query.ids);
+    } catch (e) {
+        justIds = false;
+    }
+
+    const queryResult = await getPostsByDateQuery(daysToLookBack);
+    if (queryResult instanceof Error.BusinessError) {
+        return queryResult;
+    }
+
+    const posts = [];
+
+    for (const post of queryResult.result) {
+        if (justIds) {
+            posts.push({ id: post.id });
+        } else {
+            posts.push(utils.convertPost(post));
+        }
+    }
+    return new GetPostsSuccess(posts);
+}
+
+async function getPostsByDateQuery(days) {
+    const queryResult = await db.query('SELECT * FROM Posts WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)', [days]);
+    return queryResult;
+}
+
+module.exports = { createPost, getPostById, getPostsByUserId, getPostsByGroupId, getPostsByDate };
