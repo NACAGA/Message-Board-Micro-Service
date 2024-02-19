@@ -3,6 +3,7 @@ const Group = require('../services/domain/Group.domain');
 const User = require('../services/domain/User.domain');
 const Post = require('../services/domain/Post.domain');
 const Comment = require('../services/domain/Comment.domain');
+const Error = require('../services/domain/errors.domain');
 
 function convertGroup(group) {
     return new Group(group.id, group.name, group.description, group.created_at);

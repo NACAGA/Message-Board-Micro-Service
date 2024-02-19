@@ -112,6 +112,11 @@ router.get('/like/:likeid', [validateUrlParameters(['likeid']), param('likeid').
 
 router.get('/like/user/:userid', [validateUrlParameters(['userid']), param('userid').isInt()], messageBoardController.getLikesByUserId);
 
+router.get(
+    '/like/:mediatype/:mediaid',
+    [validateUrlParameters(['mediatype', 'mediaid']), param('mediaid').isInt()],
+    messageBoardController.getLikesByMediaTypeAndId
+);
 /**
  * POST create a group
  */

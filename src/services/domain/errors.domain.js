@@ -152,6 +152,15 @@ class LikeNotFoundError extends BusinessError {
     }
 }
 
+class MediaNotFoundError extends BusinessError {
+    constructor(mediatype, mediaid) {
+        super();
+        this.message = 'Media does not exist';
+        this.mediatype = mediatype;
+        this.mediaid = mediaid;
+    }
+}
+
 class UserNotFoundError extends BusinessError {
     constructor(userid) {
         super();
@@ -189,4 +198,5 @@ module.exports = {
     UserNotFoundError,
     InvalidIdError,
     LikeNotFoundError,
+    MediaNotFoundError,
 };

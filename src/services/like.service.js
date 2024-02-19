@@ -101,14 +101,41 @@ async function getLikeByLikeId(likeid) {
     return queryResult;
 }
 
+async function userExists(userid) {
+    const actualId = await utils.parseId(userid);
+    if (actualId instanceof Error.InvalidIdError) {
+        return new Error.InvalidIdError(actualId);
+    }
+    const queryResult = await db.query('SELECT * FROM GroupMembers WHERE id = ?', [actualId]);
+    if (queryResult.result.length === 0) {
+        return new Error.UserNotFoundError(actualId);
+    }
+    return queryResult;
+}
+
 async function getLikesByUserId(userid) {
     const actualId = await utils.parseId(userid.params.userid);
     if (actualId instanceof Error.InvalidIdError) {
         return new Error.InvalidIdError(actualId);
     }
-    const queryResult = await db.query('SELECT * FROM Likes WHERE user_id = ?', [actualId]);
-    if (queryResult.result.length === 0) {
+    if (await userExists(actualId) instanceof Error.UserNotFoundError) {
         return new Error.UserNotFoundError(actualId);
+    }
+    const queryResult = await db.query('SELECT * FROM Likes WHERE user_id = ?', [actualId]);
+    return queryResult;
+}
+
+async function getLikesByMediaTypeAndId(params) {
+    const mediaType = params.params.mediatype;
+    const mediaId = await utils.parseId(params.params.mediaid);
+
+    if (mediaId instanceof Error.InvalidIdError) {
+        return new Error.InvalidIdError(mediaId);
+    }
+    const queryResult = await db.query('SELECT * FROM Likes WHERE media_type = ? AND media_id = ?', [mediaType, mediaId]);
+
+    if (queryResult.result.length === 0) {
+        return new Error.MediaNotFoundError(mediaType, mediaId);
     }
     return queryResult;
 }
@@ -117,4 +144,5 @@ module.exports = {
     createLike,
     getLikeByLikeId,
     getLikesByUserId,
+    getLikesByMediaTypeAndId,
 };
