@@ -94,7 +94,6 @@ async function getLikeByLikeId(likeid) {
     if (actualId instanceof Error.InvalidIdError) {
         return new Error.InvalidIdError(actualId);
     }
-    console.log('actualId', actualId);
     const queryResult = await db.query('SELECT * FROM Likes WHERE id = ?', [actualId]);
     if (queryResult.result.length === 0) {
         return new Error.LikeNotFoundError(actualId);
@@ -102,7 +101,20 @@ async function getLikeByLikeId(likeid) {
     return queryResult;
 }
 
+async function getLikesByUserId(userid) {
+    const actualId = await utils.parseId(userid.params.userid);
+    if (actualId instanceof Error.InvalidIdError) {
+        return new Error.InvalidIdError(actualId);
+    }
+    const queryResult = await db.query('SELECT * FROM Likes WHERE user_id = ?', [actualId]);
+    if (queryResult.result.length === 0) {
+        return new Error.UserNotFoundError(actualId);
+    }
+    return queryResult;
+}
+
 module.exports = {
     createLike,
     getLikeByLikeId,
+    getLikesByUserId,
 };

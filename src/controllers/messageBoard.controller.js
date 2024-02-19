@@ -180,6 +180,17 @@ async function getLikeByLikeId(req, res, next) {
     }
 }
 
+async function getLikesByUserId(req, res, next) {
+    try {
+        let response = await likeService.getLikesByUserId(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while getting likes: ', err);
+        next(err);
+    }
+}
+
 module.exports = {
     createGroup,
     addUser,
@@ -197,4 +208,5 @@ module.exports = {
     getPostsByGroupId,
     getPostsByDate,
     getLikeByLikeId,
+    getLikesByUserId,
 };

@@ -57,13 +57,6 @@ async function validateGroupExists(groupid) {
     return result;
 }
 
-async function parseId(originalId) {
-    const id = parseInt(originalId);
-    if (isNaN(id) || !Number(originalId)) {
-        return new Error.InvalidIdError(id);
-    }
-    return id;
-}
 
 async function verifyUserIsInGroup(userid, groupid) {
     const queryResult = await db.query('SELECT * FROM GroupMembers WHERE user_id = ? AND group_id = ?', [userid, groupid]);
@@ -89,7 +82,7 @@ async function createPostQuery(userid, groupid, content, postedOnDate) {
 }
 
 async function getPostById(postid) {
-    const idToLookFor = await parseId(postid.params.postid);
+    const idToLookFor = await utils.parseId(postid.params.postid);
 
     if (idToLookFor instanceof Error.InvalidIdError) {
         return new Error.InvalidIdError(idToLookFor);
@@ -103,7 +96,7 @@ async function getPostById(postid) {
 }
 
 async function getPostsByUserId(userid) {
-    const idToLookFor = await parseId(userid.params.userid);
+    const idToLookFor = await utils.parseId(userid.params.userid);
 
     if (idToLookFor instanceof Error.InvalidIdError) {
         return new Error.InvalidIdError(idToLookFor);
@@ -120,7 +113,7 @@ async function getPostsByUserId(userid) {
 }
 
 async function getPostsByGroupId(groupid) {
-    const idToLookFor = await parseId(groupid.params.groupid);
+    const idToLookFor = await utils.parseId(groupid.params.groupid);
 
     if (idToLookFor instanceof Error.InvalidIdError) {
         return new Error.InvalidIdError(idToLookFor);
