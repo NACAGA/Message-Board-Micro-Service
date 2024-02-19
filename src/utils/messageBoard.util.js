@@ -24,4 +24,13 @@ function convertComment(comment) {
     return new Comment(comment.id, comment.content, comment.user_id, comment.post_id, comment.created_at);
 }
 
-module.exports = { convertGroup, convertUser, convertUserGroup, convertPost, convertComment };
+async function parseId(originalId) {
+    const id = parseInt(originalId);
+    if (isNaN(id) || !Number(originalId)) {
+        return new Error.InvalidIdError(id);
+    }
+    return id;
+}
+
+
+module.exports = { convertGroup, convertUser, convertUserGroup, convertPost, convertComment, parseId };

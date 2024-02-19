@@ -144,6 +144,14 @@ class CreateLikeError extends BusinessError {
     }
 }
 
+class LikeNotFoundError extends BusinessError {
+    constructor(likeid) {
+        super();
+        this.message = 'Like does not exist';
+        this.likeid = likeid;
+    }
+}
+
 class UserNotFoundError extends BusinessError {
     constructor(userid) {
         super();
@@ -180,4 +188,5 @@ module.exports = {
     CreateLikeError,
     UserNotFoundError,
     InvalidIdError,
+    LikeNotFoundError,
 };

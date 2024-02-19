@@ -169,6 +169,17 @@ async function createLike(req, res, next) {
     }
 }
 
+async function getLikeByLikeId(req, res, next) {
+    try {
+        let response = await likeService.getLikeByLikeId(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while getting like: ', err);
+        next(err);
+    }
+}
+
 module.exports = {
     createGroup,
     addUser,
@@ -185,4 +196,5 @@ module.exports = {
     getPostsByUserId,
     getPostsByGroupId,
     getPostsByDate,
+    getLikeByLikeId,
 };

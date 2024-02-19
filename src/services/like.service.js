@@ -2,7 +2,7 @@ const Success = require('./domain/success.domain');
 const Error = require('./domain/errors.domain');
 const db = require('./db.service');
 const MediaType = require('./domain/MediaTypeEnum.domain');
-
+const utils = require('../utils/messageBoard.util');
 class CreateLikeSuccess extends Success {
     constructor(userid, mediatype, mediaid) {
         super();
@@ -89,6 +89,20 @@ async function createLikeQuery(userid, mediatype, mediaid) {
     return queryResult;
 }
 
+async function getLikeByLikeId(likeid) {
+    const actualId = await utils.parseId(likeid.params.likeid);
+    if (actualId instanceof Error.InvalidIdError) {
+        return new Error.InvalidIdError(actualId);
+    }
+    console.log('actualId', actualId);
+    const queryResult = await db.query('SELECT * FROM Likes WHERE id = ?', [actualId]);
+    if (queryResult.result.length === 0) {
+        return new Error.LikeNotFoundError(actualId);
+    }
+    return queryResult;
+}
+
 module.exports = {
     createLike,
+    getLikeByLikeId,
 };

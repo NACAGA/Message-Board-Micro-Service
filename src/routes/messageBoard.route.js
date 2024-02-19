@@ -102,6 +102,16 @@ router.get(
 router.get('/post/date/:days', [validateUrlParameters(['days']), param('days').isInt()], messageBoardController.getPostsByDate);
 
 /**
+ * GET all likes on a post
+ * GET like by id
+ * GET all likes by a user
+ * GET all likes by media
+ */
+
+router.get('/like/:likeid', [validateUrlParameters(['likeid']), param('likeid').isInt()], messageBoardController.getLikeByLikeId);
+
+
+/**
  * POST create a group
  */
 router.post(
