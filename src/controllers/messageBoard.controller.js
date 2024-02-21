@@ -158,9 +158,9 @@ async function createComment(req, res, next) {
     }
 }
 
-async function createLike(req, res, next) {
+async function toggleLike(req, res, next) {
     try {
-        let response = await likeService.createLike(req);
+        let response = await likeService.toggleLike(req);
         response = response.getResponse();
         res.status(response.status).json(response.body);
     } catch (err) {
@@ -191,7 +191,6 @@ async function getLikesByUserId(req, res, next) {
     }
 }
 
-
 async function getLikesByMediaTypeAndId(req, res, next) {
     try {
         let response = await likeService.getLikesByMediaTypeAndId(req);
@@ -203,7 +202,16 @@ async function getLikesByMediaTypeAndId(req, res, next) {
     }
 }
 
-
+async function getLikeCountByMedia(req, res, next) {
+    try {
+        let response = await likeService.getLikeCount(req);
+        response = response.getResponse();
+        res.status(response.status).json(response.body);
+    } catch (err) {
+        console.error('Error while getting like count: ', err);
+        next(err);
+    }
+}
 
 module.exports = {
     createGroup,
@@ -216,12 +224,13 @@ module.exports = {
     getCommentById,
     getUserComments,
     getPostComments,
-    createLike,
+    toggleLike,
     getPostById,
     getPostsByUserId,
     getPostsByGroupId,
     getPostsByDate,
     getLikeByLikeId,
     getLikesByUserId,
+    getLikeCountByMedia,
     getLikesByMediaTypeAndId,
 };
