@@ -106,7 +106,6 @@ router.get('/post/date/:days', [validateUrlParameters(['days']), param('days').i
  * GET like by id
  * GET all likes by a user
  * GET all likes by media
- * GET like count by media
  */
 
 router.get('/like/:likeid', [validateUrlParameters(['likeid']), param('likeid').isInt()], messageBoardController.getLikeByLikeId);
@@ -119,11 +118,6 @@ router.get(
     messageBoardController.getLikesByMediaTypeAndId
 );
 
-router.get(
-    '/like-count/:mediatype/:mediaid',
-    [validateUrlParameters(['mediatype', 'mediaid']), param('mediaid').isInt()],
-    messageBoardController.getLikeCountByMedia
-);
 /**
  * POST create a group
  */

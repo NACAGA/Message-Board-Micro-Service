@@ -89,6 +89,7 @@ class CreatePostError extends BusinessError {
 class UserNotInGroupError extends BusinessError {
     constructor(userid, groupid) {
         super();
+        this.code = 401;
         this.message = 'User not in group';
         this.userid = userid;
         this.groupid = groupid;

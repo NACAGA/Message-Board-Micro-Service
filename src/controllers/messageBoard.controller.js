@@ -202,17 +202,6 @@ async function getLikesByMediaTypeAndId(req, res, next) {
     }
 }
 
-async function getLikeCountByMedia(req, res, next) {
-    try {
-        let response = await likeService.getLikeCount(req);
-        response = response.getResponse();
-        res.status(response.status).json(response.body);
-    } catch (err) {
-        console.error('Error while getting like count: ', err);
-        next(err);
-    }
-}
-
 module.exports = {
     createGroup,
     addUser,
@@ -231,6 +220,5 @@ module.exports = {
     getPostsByDate,
     getLikeByLikeId,
     getLikesByUserId,
-    getLikeCountByMedia,
     getLikesByMediaTypeAndId,
 };

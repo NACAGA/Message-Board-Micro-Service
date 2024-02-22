@@ -41,6 +41,15 @@ class GetUserCommentsSuccess extends GetCommentsSuccess {
     }
 }
 
+class GetPostCommentCount extends Success {
+    constructor(count, postid) {
+        super();
+        this.message = 'Comment count retrieved';
+        this.count = count;
+        this.postid = postid;
+    }
+}
+
 async function createComment(req) {
     try {
         const verifyUserIsInGroupResult = await verifyUserIsInGroup(req.params.userid, req.params.postid);
@@ -92,6 +101,10 @@ async function getPostComments(req) {
         const getCommentsResult = await getPostCommentsQuery(req.params.postid);
         if (getCommentsResult instanceof Error.BusinessError) {
             return getCommentsResult;
+        }
+
+        if (req.query.count) {
+            return new GetPostCommentCount(getCommentsResult.result.length, req.params.postid);
         }
 
         const comments = [];

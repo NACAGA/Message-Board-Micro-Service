@@ -15,10 +15,12 @@ class ToggleLikeSuccess extends Success {
 }
 
 class GetLikeCountSuccess extends Success {
-    constructor(count) {
+    constructor(count, mediaType, mediaId) {
         super();
         this.message = 'Like count retrieved';
         this.count = count;
+        this.mediaType = mediaType;
+        this.mediaId = mediaId;
     }
 }
 
@@ -47,37 +49,6 @@ async function toggleLike(req) {
         }
 
         return new ToggleLikeSuccess(req.params.userid, mediaType, req.params.mediaid);
-    } catch (error) {
-        // Handle unexpected errors here
-        console.error(error);
-        return new Error.UnknownError();
-    }
-}
-
-async function getLikeCount(req) {
-    try {
-        let mediaType;
-        if (req.params.mediatype === 'post') {
-            mediaType = MediaType.Post;
-            const verifyPostExistsResult = await verifyPostExistsQuery(req.params.mediaid);
-            if (verifyPostExistsResult instanceof Error.BusinessError) {
-                return verifyPostExistsResult;
-            }
-        } else if (req.params.mediatype === 'comment') {
-            mediaType = MediaType.Comment;
-            const verifyCommentExistsResult = await verifyCommentExistsQuery(req.params.mediaid);
-            if (verifyCommentExistsResult instanceof Error.BusinessError) {
-                return verifyCommentExistsResult;
-            }
-        } else {
-            return new Error.InvalidMediaTypeError(req.params.mediatype);
-        }
-
-        const getLikesByMediaTypeAndIdResult = await getLikesByMediaTypeAndIdQuery(req);
-        if (getLikesByMediaTypeAndIdResult instanceof Error.BusinessError) {
-            return getLikesByMediaTypeAndIdResult;
-        }
-        return new GetLikeCountSuccess(getLikesByMediaTypeAndIdResult.result.length);
     } catch (error) {
         // Handle unexpected errors here
         console.error(error);
@@ -178,14 +149,18 @@ async function getLikesByUserId(userid) {
     return queryResult;
 }
 
-async function getLikesByMediaTypeAndIdQuery(params) {
-    const mediaType = params.params.mediatype;
-    const mediaId = await utils.parseId(params.params.mediaid);
+async function getLikesByMediaTypeAndId(req) {
+    const mediaType = req.params.mediatype;
+    const mediaId = await utils.parseId(req.params.mediaid);
 
     if (mediaId instanceof Error.InvalidIdError) {
         return new Error.InvalidIdError(mediaId);
     }
     const queryResult = await db.query('SELECT * FROM Likes WHERE media_type = ? AND media_id = ?', [mediaType, mediaId]);
+    console.log(req.query);
+    if (req.query.count) {
+        return new GetLikeCountSuccess(queryResult.result.length, req.params.mediatype, req.params.mediaid);
+    }
     return queryResult;
 }
 
@@ -193,6 +168,5 @@ module.exports = {
     toggleLike,
     getLikeByLikeId,
     getLikesByUserId,
-    getLikesByMediaTypeAndId: getLikesByMediaTypeAndIdQuery,
-    getLikeCount,
+    getLikesByMediaTypeAndId,
 };
