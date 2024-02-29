@@ -72,7 +72,7 @@ async function getUsers(req, res, next) {
 
 async function getUserGroups(req, res, next) {
     try {
-        let response = await groupService.getUserGroups(req);
+        let response = await groupService.getGroupsByUserId(req);
         response = response.getResponse();
         res.status(response.status).json(response.body);
     } catch (err) {

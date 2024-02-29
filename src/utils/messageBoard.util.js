@@ -14,7 +14,7 @@ function convertUserGroup(group) {
 }
 
 function convertUser(user) {
-    return new User(user.id);
+    return new User(user.user_id);
 }
 
 function convertPost(post) {
@@ -27,7 +27,7 @@ function convertComment(comment) {
 
 /**
  * Parses the id into an integer
- * @param {string} originalId 
+ * @param {string} originalId
  * @returns  integer id or Error.InvalidIdError
  */
 async function parseId(originalId) {
@@ -37,6 +37,5 @@ async function parseId(originalId) {
     }
     return id;
 }
-
 
 module.exports = { convertGroup, convertUser, convertUserGroup, convertPost, convertComment, parseId };
