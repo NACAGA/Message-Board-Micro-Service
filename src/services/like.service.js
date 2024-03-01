@@ -3,29 +3,39 @@ const Error = require('./domain/errors.domain');
 const db = require('./db.service');
 const MediaType = require('./domain/MediaTypeEnum.domain');
 const utils = require('../utils/messageBoard.util');
-class CreateLikeSuccess extends Success {
+class ToggleLikeSuccess extends Success {
     constructor(userid, mediatype, mediaid) {
         super();
         this.code = 200;
-        this.message = 'Like created';
+        this.message = 'Like toggled';
         this.userid = userid;
         this.mediatype = mediatype;
         this.mediaid = mediaid;
     }
 }
 
-async function createLike(req) {
+class GetLikeCountSuccess extends Success {
+    constructor(count, mediaType, mediaId) {
+        super();
+        this.message = 'Like count retrieved';
+        this.count = count;
+        this.mediaType = mediaType;
+        this.mediaId = mediaId;
+    }
+}
+
+async function toggleLike(req) {
     try {
         let mediaType;
         if (req.params.mediatype === 'post') {
             mediaType = MediaType.Post;
-            const verifyPostExistsResult = await verifyPostExists(req.params.mediaid);
+            const verifyPostExistsResult = await verifyPostExistsQuery(req.params.mediaid);
             if (verifyPostExistsResult instanceof Error.BusinessError) {
                 return verifyPostExistsResult;
             }
         } else if (req.params.mediatype === 'comment') {
             mediaType = MediaType.Comment;
-            const verifyCommentExistsResult = await verifyCommentExists(req.params.mediaid);
+            const verifyCommentExistsResult = await verifyCommentExistsQuery(req.params.mediaid);
             if (verifyCommentExistsResult instanceof Error.BusinessError) {
                 return verifyCommentExistsResult;
             }
@@ -33,17 +43,12 @@ async function createLike(req) {
             return new Error.InvalidMediaTypeError(req.params.mediatype);
         }
 
-        const verifyUserHasNotLikedResult = await verifyUserHasNotLiked(req.params.userid, mediaType, req.params.mediaid);
-        if (verifyUserHasNotLikedResult instanceof Error.BusinessError) {
-            return verifyUserHasNotLikedResult;
+        const toggleLikeResult = await toggleLikeQuery(req.params.userid, mediaType, req.params.mediaid);
+        if (toggleLikeResult instanceof Error.BusinessError) {
+            return toggleLikeResult;
         }
 
-        const createLikeResult = await createLikeQuery(req.params.userid, mediaType, req.params.mediaid);
-        if (createLikeResult instanceof Error.BusinessError) {
-            return createLikeResult;
-        }
-
-        return new CreateLikeSuccess(req.params.userid, mediaType, req.params.mediaid);
+        return new ToggleLikeSuccess(req.params.userid, mediaType, req.params.mediaid);
     } catch (error) {
         // Handle unexpected errors here
         console.error(error);
@@ -51,7 +56,7 @@ async function createLike(req) {
     }
 }
 
-async function verifyPostExists(postid) {
+async function verifyPostExistsQuery(postid) {
     const queryResult = await db.query('SELECT * FROM Posts WHERE id = ?', [postid]);
     if (queryResult.result.length === 0) {
         return new Error.PostNotFoundError(postid);
@@ -59,7 +64,7 @@ async function verifyPostExists(postid) {
     return queryResult;
 }
 
-async function verifyCommentExists(commentid) {
+async function verifyCommentExistsQuery(commentid) {
     const queryResult = await db.query('SELECT * FROM Comments WHERE id = ?', [commentid]);
     if (queryResult.result.length === 0) {
         return new Error.CommentNotFoundError(commentid);
@@ -67,20 +72,39 @@ async function verifyCommentExists(commentid) {
     return queryResult;
 }
 
-async function verifyUserHasNotLiked(userid, mediatype, mediaid) {
+async function hasUserAlreadyLikedQuery(userid, mediatype, mediaid) {
     const queryResult = await db.query('SELECT * FROM Likes WHERE user_id = ? AND media_type = ? AND media_id = ?', [
         userid,
         mediatype,
         mediaid,
     ]);
-    if (queryResult.result.length > 0) {
-        return new Error.UserHasAlreadyLikedError(userid, mediatype, mediaid);
+    if (queryResult instanceof Error.BusinessError) {
+        return queryResult;
     }
-    return queryResult;
+    if (queryResult.result.length > 0) {
+        return true;
+    }
+    return false;
 }
 
-async function createLikeQuery(userid, mediatype, mediaid) {
-    const queryResult = await db.query('INSERT INTO Likes (user_id, media_type, media_id) VALUES (?, ?, ?)', [userid, mediatype, mediaid]);
+async function toggleLikeQuery(userid, mediatype, mediaid) {
+    const hasUserAlreadyLiked = await hasUserAlreadyLikedQuery(userid, mediatype, mediaid);
+    if (hasUserAlreadyLiked instanceof Error.BusinessError) {
+        return hasUserAlreadyLiked;
+    }
+    let queryResult;
+    if (hasUserAlreadyLiked) {
+        queryResult = await db.query('DELETE FROM Likes WHERE user_id = ? AND media_type = ? AND media_id = ?', [
+            userid,
+            mediatype,
+            mediaid,
+        ]);
+    } else {
+        queryResult = await db.query('INSERT INTO Likes (user_id, media_type, media_id) VALUES (?, ?, ?)', [userid, mediatype, mediaid]);
+    }
+    if (queryResult instanceof Error.BusinessError) {
+        return queryResult;
+    }
 
     if (queryResult.result.affectedRows === 0) {
         return new Error.CreateLikeError();
@@ -118,30 +142,30 @@ async function getLikesByUserId(userid) {
     if (actualId instanceof Error.InvalidIdError) {
         return new Error.InvalidIdError(actualId);
     }
-    if (await userExists(actualId) instanceof Error.UserNotFoundError) {
+    if ((await userExists(actualId)) instanceof Error.UserNotFoundError) {
         return new Error.UserNotFoundError(actualId);
     }
     const queryResult = await db.query('SELECT * FROM Likes WHERE user_id = ?', [actualId]);
     return queryResult;
 }
 
-async function getLikesByMediaTypeAndId(params) {
-    const mediaType = params.params.mediatype;
-    const mediaId = await utils.parseId(params.params.mediaid);
+async function getLikesByMediaTypeAndId(req) {
+    const mediaType = req.params.mediatype;
+    const mediaId = await utils.parseId(req.params.mediaid);
 
     if (mediaId instanceof Error.InvalidIdError) {
         return new Error.InvalidIdError(mediaId);
     }
     const queryResult = await db.query('SELECT * FROM Likes WHERE media_type = ? AND media_id = ?', [mediaType, mediaId]);
-
-    if (queryResult.result.length === 0) {
-        return new Error.MediaNotFoundError(mediaType, mediaId);
+    console.log(req.query);
+    if (req.query.count) {
+        return new GetLikeCountSuccess(queryResult.result.length, req.params.mediatype, req.params.mediaid);
     }
     return queryResult;
 }
 
 module.exports = {
-    createLike,
+    toggleLike,
     getLikeByLikeId,
     getLikesByUserId,
     getLikesByMediaTypeAndId,

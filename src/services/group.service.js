@@ -41,6 +41,15 @@ class GetUserGroupSuccess extends Success {
     }
 }
 
+class GetGroupsUserNotInSuccess extends Success {
+    constructor(groups) {
+        super();
+        this.code = 200;
+        this.message = 'Groups retrieved';
+        this.groups = groups;
+    }
+}
+
 async function getGroups(req) {
     try {
         if (req.params.groupid) {
@@ -54,17 +63,28 @@ async function getGroups(req) {
     }
 }
 
-async function getUserGroups(req) {
+// Defaults to the groups a user is in, but can be used to get groups a user is not in
+async function getGroupsByUserId(req) {
     try {
-        const getUsersGroupsResult = await getAUsersGroups(req.params.userid);
-        if (getUsersGroupsResult instanceof Error.BusinessError) {
-            return getUsersGroupsResult;
+        let queriedGroups;
+        if (req.query.notIn) {
+            const getGroupsUserNotInResult = await getGroupsUserNotIn(req.params.userid);
+            if (getGroupsUserNotInResult instanceof Error.BusinessError) {
+                return getGroupsUserNotInResult;
+            }
+            queriedGroups = getGroupsUserNotInResult;
+        } else {
+            const getUsersGroupsResult = await getAllGroupsAUserIsIn(req.params.userid);
+            if (getUsersGroupsResult instanceof Error.BusinessError) {
+                return getUsersGroupsResult;
+            }
+            queriedGroups = getUsersGroupsResult;
         }
 
         const user = new User(req.params.userid);
         const groups = [];
 
-        for (const group of getUsersGroupsResult.result) {
+        for (const group of queriedGroups.result) {
             groups.push(utils.convertGroup(group));
         }
 
@@ -133,14 +153,26 @@ async function getRequestedGroupById(groupId) {
     return new GetGroupByIdSuccess(group);
 }
 
-async function getAUsersGroups(userid) {
+async function getAllGroupsAUserIsIn(userid) {
     const queryResult = await db.query(
         'SELECT g.id, g.name, g.description, g.created_at, gm.user_id, gm.joined_on FROM GroupMembers gm JOIN Groups g ON g.id = gm.group_id WHERE gm.user_id = ?;',
         [userid]
     );
-    if (queryResult.result.length === 0) {
-        return new Error.UserNotInAGroupError(userid);
+    return queryResult;
+}
+
+async function getGroupsUserNotIn(userid) {
+    const getAllUsersGroupsQueryResult = await getAllGroupsAUserIsIn(userid);
+    console.log(getAllUsersGroupsQueryResult.result);
+    if (getAllUsersGroupsQueryResult.result.length === 0) {
+        return await db.query('SELECT * FROM Groups');
     }
+    const groupIdsOfGroupsUserIsIn = getAllUsersGroupsQueryResult.result.map((group) => group.id);
+
+    const placeholders = groupIdsOfGroupsUserIsIn.map(() => '?').join(', ');
+
+    const queryResult = await db.query(`SELECT * FROM Groups WHERE id NOT IN (${placeholders})`, groupIdsOfGroupsUserIsIn);
+    console.log(queryResult);
     return queryResult;
 }
 
@@ -164,4 +196,4 @@ async function getGroupById(groupId) {
     return await db.query('SELECT * FROM Groups WHERE id = ?', [groupId]);
 }
 
-module.exports = { createGroup, getGroups, getUserGroups };
+module.exports = { createGroup, getGroups, getGroupsByUserId };

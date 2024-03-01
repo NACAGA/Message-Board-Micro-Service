@@ -14,11 +14,11 @@ services:
       dockerfile: Dockerfile
     container_name: message-board-database
     ports:
-      - ${DB_PORT}:${DB_PORT}
+      - ${LOCAL_DB_PORT}:${VIRTUAL_DB_PORT}
     restart: always
     networks:
       obscenity:
-        ipv4_address: 172.20.0.2
+        ipv4_address: 172.21.0.2
   server:
     depends_on:
       - database
@@ -29,16 +29,16 @@ services:
         - DB_HOST=database
     container_name: message-board-server
     ports:
-      - ${SERVER_PORT}:${SERVER_PORT}
+      - ${LOCAL_SERVER_PORT}:${VIRTUAL_SERVER_PORT}
     tty: true
     stdin_open: true
     volumes:
       - .:/workspace
     networks:
       obscenity:
-        ipv4_address: 172.20.0.3
+        ipv4_address: 172.21.0.3
 networks:
   obscenity:
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.21.0.0/16

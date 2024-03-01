@@ -117,6 +117,7 @@ router.get(
     [validateUrlParameters(['mediatype', 'mediaid']), param('mediaid').isInt()],
     messageBoardController.getLikesByMediaTypeAndId
 );
+
 /**
  * POST create a group
  */
@@ -166,16 +167,11 @@ router.post(
 );
 
 /**
- * POST create a like
+ * POST toggle a like
  */
 router.post(
     '/like/:userid/:mediatype/:mediaid',
-    [
-        validateUrlParameters(['userid', 'mediatype', 'mediaid']),
-        param('userid').isInt(),
-        //() => param('mediatype') === 'post' || param('mediatype') === 'comment',
-        param('mediaid').isInt(),
-    ],
-    messageBoardController.createLike
+    [validateUrlParameters(['userid', 'mediatype', 'mediaid']), param('userid').isInt(), param('mediaid').isInt()],
+    messageBoardController.toggleLike
 );
 module.exports = router;

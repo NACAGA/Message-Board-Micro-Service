@@ -72,7 +72,7 @@ async function getUsers(req, res, next) {
 
 async function getUserGroups(req, res, next) {
     try {
-        let response = await groupService.getUserGroups(req);
+        let response = await groupService.getGroupsByUserId(req);
         response = response.getResponse();
         res.status(response.status).json(response.body);
     } catch (err) {
@@ -158,9 +158,9 @@ async function createComment(req, res, next) {
     }
 }
 
-async function createLike(req, res, next) {
+async function toggleLike(req, res, next) {
     try {
-        let response = await likeService.createLike(req);
+        let response = await likeService.toggleLike(req);
         response = response.getResponse();
         res.status(response.status).json(response.body);
     } catch (err) {
@@ -191,7 +191,6 @@ async function getLikesByUserId(req, res, next) {
     }
 }
 
-
 async function getLikesByMediaTypeAndId(req, res, next) {
     try {
         let response = await likeService.getLikesByMediaTypeAndId(req);
@@ -202,8 +201,6 @@ async function getLikesByMediaTypeAndId(req, res, next) {
         next(err);
     }
 }
-
-
 
 module.exports = {
     createGroup,
@@ -216,7 +213,7 @@ module.exports = {
     getCommentById,
     getUserComments,
     getPostComments,
-    createLike,
+    toggleLike,
     getPostById,
     getPostsByUserId,
     getPostsByGroupId,

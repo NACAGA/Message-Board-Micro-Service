@@ -26,6 +26,16 @@ class GetUsersInGroupSuccess extends Success {
     }
 }
 
+class GetNumberOfUsersInGroupSuccess extends Success {
+    constructor(groupid, count) {
+        super();
+        this.code = 200;
+        this.message = 'Number of users in group retrieved';
+        this.groupid = groupid;
+        this.count = count;
+    }
+}
+
 async function getUsers(req) {
     try {
         const validateGroupExistsResult = await validateGroupExists(req.params.groupid);
@@ -37,6 +47,10 @@ async function getUsers(req) {
         const getUsersResult = await getUsersInGroup(req.params.groupid);
         if (getUsersResult instanceof Error.BusinessError) {
             return getUsersResult;
+        }
+
+        if (req.query.count) {
+            return new GetNumberOfUsersInGroupSuccess(req.params.groupid, getUsersResult.result.length);
         }
 
         const users = [];

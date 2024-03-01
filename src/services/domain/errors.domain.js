@@ -48,6 +48,7 @@ class GroupExistsError extends BusinessError {
 class UserAlreadyInGroupError extends BusinessError {
     constructor(userid, groupid) {
         super();
+        this.code = 409;
         this.message = 'User already in group';
         this.userid = userid;
         this.groupid = groupid;
@@ -89,6 +90,7 @@ class CreatePostError extends BusinessError {
 class UserNotInGroupError extends BusinessError {
     constructor(userid, groupid) {
         super();
+        this.code = 401;
         this.message = 'User not in group';
         this.userid = userid;
         this.groupid = groupid;
@@ -177,6 +179,14 @@ class InvalidIdError extends BusinessError {
     }
 }
 
+class GetGroupsUserIsNotInError extends BusinessError {
+    constructor(userid) {
+        super();
+        this.message = 'Falied to retrieve groups user is not in';
+        this.userid = userid;
+    }
+}
+
 module.exports = {
     BusinessError,
     DatabaseError,
@@ -199,4 +209,5 @@ module.exports = {
     InvalidIdError,
     LikeNotFoundError,
     MediaNotFoundError,
+    GetGroupsUserIsNotInError,
 };
